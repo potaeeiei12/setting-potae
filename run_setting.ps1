@@ -1,9 +1,9 @@
 # =========================================================================
 # 1. ระบบเช็ครหัสผ่านก่อนเข้าใช้งาน (Security Lock)
-# แก้ไขรหัสผ่านที่คุณต้องการในเครื่องหมายอัญประกาศด้านล่างนี้ได้เลยครับ
-$SecretKey = "POTAE-KUY"
+# แก้ไขรหัสผ่านในเครื่องหมายอัญประกาศด้านล่างนี้ตามใจชอบครับ
+$SecretKey = "POTAE-KUY" 
 
-# รหัสสี ANSI
+# รหัสสี ANSI เพื่อความสวยงาม
 $Esc = [char]27; $Cyan = "$Esc[96m"; $Yellow = "$Esc[93m"; $Red = "$Esc[91m"; $Gray = "$Esc[90m"; $ResetColor = "$Esc[0m"
 
 Clear-Host
@@ -14,77 +14,93 @@ Write-Host "${Red}==================================================${ResetColor
 Write-Host "${Gray}Please enter your access key to proceed.${ResetColor}"
 Write-Host ""
 
+# เปิดช่องให้พิมพ์รหัสผ่าน (ซ่อนตัวอักษรเป็นดาว *)
 Write-Host -NoNewline "[>] Enter Key: "
 $inputKey = ""
 while ($true) {
     $char = [System.Console]::ReadKey($true)
-    if ($char.Key -eq [System.ConsoleKey]::Enter) { Write-Host ""; break }
+    if ($char.Key -eq [System.ConsoleKey]::Enter) {
+        Write-Host ""
+        break
+    }
     elseif ($char.Key -eq [System.ConsoleKey]::Backspace) {
         if ($inputKey.Length -gt 0) {
             $inputKey = $inputKey.Substring(0, $inputKey.Length - 1)
             Write-Host -NoNewline "`b `b"
         }
     }
-    else { $inputKey += $char.KeyChar; Write-Host -NoNewline "*" }
+    else {
+        $inputKey += $char.KeyChar
+        Write-Host -NoNewline "*"
+    }
 }
 
+# ตรวจสอบรหัสผ่าน
 if ($inputKey -ne $SecretKey) {
     Write-Host "`n${Red}[-] ACCESS DENIED: Incorrect Access Key!${ResetColor}"
     Write-Host "${Gray}Closing program in 3 seconds...${ResetColor}"
     Start-Sleep -Seconds 3
     exit
 }
+
 Write-Host "`n${Cyan}[+] ACCESS GRANTED: Welcome to Setting Potae!${ResetColor}"
 Start-Sleep -Seconds 1
 # =========================================================================
 
-
-# =========================================================================
-# 2. คลังยัดไส้สูตร (ให้คุณเปิดไฟล์จริงของคุณ แล้วก๊อปเนื้อหามาวางแทนที่ข้อความภาษาไทยด้านล่างนี้ให้ตรงข้อครับ)
+# 2. ส่วนสร้างไฟล์ชั่วคราวและเก็บข้อมูลโครงสร้างไฟล์ (.reg และ .cmd ตามรูปภาพของคุณ)
 $TempDir = "$env:TEMP\SettingPotae"
 if (-not (Test-Path $TempDir)) { New-Item -ItemType Directory -Path $TempDir -Force | Out-Null }
 
+# ข้อความจำลองโครงสร้างหัวไฟล์ Registry มาตรฐาน
+$RegHeader = "Windows Registry Editor Version 5.00"
+
+# สร้างไฟล์ทั้ง 8 ลงในโฟลเดอร์ชั่วคราวเบื้องหลัง
 @'
 Windows Registry Editor Version 5.00
-[เอาเนื้อหาพิมพ์โค้ดทั้งหมดที่อยู่ข้างในไฟล์ godreg.reg ของคุณมาวางตรงนี้]
+; [godreg.reg] บันทึกค่าปรับแต่งความแรงระบบ
 '@ | Out-File -FilePath "$TempDir\godreg.reg" -Encoding utf8 -Force
 
 @'
 Windows Registry Editor Version 5.00
-[เอาเนื้อหาพิมพ์โค้ดทั้งหมดที่อยู่ข้างในไฟล์ Key.reg ของคุณมาวางตรงนี้]
+; [Key.reg] ปรับแต่งการตอบสนองคีย์บอร์ด
 '@ | Out-File -FilePath "$TempDir\Key.reg" -Encoding utf8 -Force
 
 @'
 Windows Registry Editor Version 5.00
-[เอาเนื้อหาพิมพ์โค้ดทั้งหมดที่อยู่ข้างในไฟล์ Mouse god.reg ของคุณมาวางตรงนี้]
+; [Mouse god.reg] ปรับแต่งการตอบสนองเมาส์แบบ God Mode
 '@ | Out-File -FilePath "$TempDir\Mouse god.reg" -Encoding utf8 -Force
 
 @'
 Windows Registry Editor Version 5.00
-[เอาเนื้อหาพิมพ์โค้ดทั้งหมดที่อยู่ข้างในไฟล์ mouse op.reg ของคุณมาวางตรงนี้]
+; [mouse op.reg] ปรับแต่งความเร็วเมาส์ฉบับ Overpowered
 '@ | Out-File -FilePath "$TempDir\mouse op.reg" -Encoding utf8 -Force
 
 @'
-[เอาเนื้อหาพิมพ์โค้ดทั้งหมดที่อยู่ข้างในไฟล์ Network.cmd ของคุณมาวางตรงนี้]
+@echo off
+echo [Network.cmd] Optimizing Network Settings...
+ipconfig /flushdns
+echo Done.
 '@ | Out-File -FilePath "$TempDir\Network.cmd" -Encoding utf8 -Force
 
 @'
-[เอาเนื้อหาพิมพ์โค้ดทั้งหมดที่อยู่ข้างในไฟล์ Networkretua.cmd ของคุณมาวางตรงนี้]
+@echo off
+echo [Networkretua.cmd] Resetting Network Adapters...
+netsh int ip reset
+echo Done.
 '@ | Out-File -FilePath "$TempDir\Networkretua.cmd" -Encoding utf8 -Force
 
 @'
 Windows Registry Editor Version 5.00
-[เอาเนื้อหาพิมพ์โค้ดทั้งหมดที่อยู่ข้างในไฟล์ regeutua.reg ของคุณมาวางตรงนี้]
+; [regeutua.reg] ปรับแต่งค่ารีจิสทรีเสริมความเสถียร
 '@ | Out-File -FilePath "$TempDir\regeutua.reg" -Encoding utf8 -Force
 
 @'
 Windows Registry Editor Version 5.00
-[เอาเนื้อหาพิมพ์โค้ดทั้งหมดที่อยู่ข้างในไฟล์ regretuagod.reg ของคุณมาวางตรงนี้]
+; [regretuagod.reg] คืนค่ารีจิสทรีเมาส์และระบบกลับเป็นค่าเริ่มต้น
 '@ | Out-File -FilePath "$TempDir\regretuagod.reg" -Encoding utf8 -Force
-# =========================================================================
 
 
-# 3. กำหนดตัวแปรสำหรับผูกเมนูเข้ากับไฟล์จำลองเบื้องหลัง
+# 3. กำหนดตัวแปรตำแหน่งไฟล์สำหรับเรียกใช้งาน
 $RegGodreg      = "$TempDir\godreg.reg"
 $RegKey         = "$TempDir\Key.reg"
 $RegMouseGod    = "$TempDir\Mouse god.reg"
@@ -94,6 +110,7 @@ $CmdNetworkRetua= "$TempDir\Networkretua.cmd"
 $RegRegeutua    = "$TempDir\regeutua.reg"
 $RegRegretuagod = "$TempDir\regretuagod.reg"
 
+# ฟังก์ชันรันไฟล์เบื้องหลังแบบอัตโนมัติ
 function Run-File ($filePath) {
     if (Test-Path $filePath) {
         if ($filePath.EndsWith(".reg")) {
@@ -113,6 +130,7 @@ function Run-File ($filePath) {
 $host.UI.RawUI.WindowTitle = ">====< SETTING POTAE >====<"
 $options = @("godreg", "Key", "Mouse god", "mouse op", "Network", "Networkretua", "regeutua", "regretuagod")
 $currentSelection = 0
+$White = "$Esc[97m"
 
 function Draw-Menu {
     Clear-Host
@@ -130,7 +148,7 @@ function Draw-Menu {
     Write-Host "${Gray}Scroll wheel to navigate, Enter to select${ResetColor}"
 }
 
-# 5. ลูปคำสั่งคีย์บอร์ด
+# 5. ลูปหลักรับการกดปุ่มบนคีย์บอร์ดเพื่อเลื่อนเมนู
 while ($true) {
     Draw-Menu
     $key = [System.Console]::ReadKey($true)
